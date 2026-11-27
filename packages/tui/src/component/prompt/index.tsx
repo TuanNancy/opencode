@@ -25,6 +25,7 @@ import { usePromptRef } from "../../context/prompt"
 import { useSessionTabs } from "../../context/session-tabs"
 import { useEvent } from "../../context/event"
 import { editorSelectionKey, useEditorContext, type EditorSelection } from "../../context/editor"
+import { getEditorRangeLabel, hasEditorRangeSelection } from "./editor-selection-label"
 import { normalizePromptContent, openEditor } from "../../editor"
 import { useExit } from "../../context/exit"
 import { expandPromptInputPastedText, realignPromptInputMentions } from "../../prompt/mention"
@@ -146,19 +147,6 @@ export function PromptInterruptStatus(props: {
   )
 }
 
-function hasEditorRangeSelection(selection: EditorSelection["ranges"][number]) {
-  return (
-    selection.selection.start.line !== selection.selection.end.line ||
-    selection.selection.start.character !== selection.selection.end.character
-  )
-}
-
-function getEditorRangeLabel(selection: EditorSelection["ranges"][number]) {
-  if (!hasEditorRangeSelection(selection)) return
-  if (selection.selection.start.line === selection.selection.end.line) return `#${selection.selection.start.line}`
-  return `#${selection.selection.start.line}-${selection.selection.end.line}`
-}
-
 function formatEditorContext(selection: EditorSelection) {
   const selected = selection.ranges.filter(hasEditorRangeSelection)
   if (selected.length === 0)
@@ -166,7 +154,7 @@ function formatEditorContext(selection: EditorSelection) {
 
   const ranges = selected.map((range, index) => {
     const prefix = selected.length > 1 ? `Selection ${index + 1}: ` : ""
-    return `Note: The user selected ${prefix}${getEditorRangeLabel(range)} from "${selection.filePath}". \`\`\`${range.text}\`\`\`\n\n`
+    return `Note: The user selected ${prefix}${getEditorRangeLabel(range, selection.source)} from "${selection.filePath}". \`\`\`${range.text}\`\`\`\n\n`
   })
 
   return `<system-update>${ranges.join("\n")} This may or may not be relevant to the current task.</system-update>\n`
@@ -237,7 +225,7 @@ export function Prompt(props: PromptProps) {
     if (!ranges) return
     const first = ranges.find(hasEditorRangeSelection) ?? ranges[0]
     if (!first) return
-    return [getEditorRangeLabel(first), ranges.length > 1 ? `+${ranges.length - 1}` : undefined]
+    return [getEditorRangeLabel(first, editorContext()?.source), ranges.length > 1 ? `+${ranges.length - 1}` : undefined]
       .filter(Boolean)
       .join(" ")
   })
