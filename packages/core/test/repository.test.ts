@@ -66,6 +66,21 @@ describe("Repository", () => {
     expect(() => Repository.validateBranch("-bad")).toThrow(Repository.InvalidBranchError)
     expect(() => Repository.validateBranch("bad..branch")).toThrow(Repository.InvalidBranchError)
     expect(() => Repository.validateBranch("bad branch")).toThrow(Repository.InvalidBranchError)
+    for (const name of [
+      "topic/",
+      "topic.",
+      "topic//child",
+      "topic.lock",
+      ".hidden",
+      "feature/.wip",
+      "topic/.child",
+      "topic/child.",
+      "topic/child.lock",
+    ])
+      expect(() => Repository.validateBranch(name)).toThrow(Repository.InvalidBranchError)
+
+    for (const name of ["topic/child.v1", "topic/child.locked", "_foo", "foo/-bar"])
+      expect(() => Repository.validateBranch(name)).not.toThrow()
   })
 
   test.each([
