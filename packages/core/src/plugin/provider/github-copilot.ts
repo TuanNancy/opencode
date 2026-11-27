@@ -315,7 +315,11 @@ export const GithubCopilotPlugin = define({
             .pipe(Effect.orElseSucceed(() => undefined))
           const interaction = interactionType(evt.kind, session?.parentID !== undefined)
           evt.headers["X-Interaction-Type"] = interaction
-          evt.headers["X-Interaction-Id"] = session ? SessionAffinity.get(session) : evt.sessionID
+          evt.headers["X-Interaction-Id"] = session
+            ? yield* SessionAffinity.root(session, (id) =>
+                ctx.session.get({ sessionID: id }).pipe(Effect.orElseSucceed(() => undefined)),
+              )
+            : evt.sessionID
           if (interaction !== "conversation-agent") evt.headers["x-initiator"] = "agent"
           const route = routes.get(evt.sessionID)
           if (route?.token && route.model === evt.model.id) evt.headers["Copilot-Session-Token"] = route.token

@@ -325,7 +325,11 @@ export const ChatGPTPlugin = define({
             .get({ sessionID: evt.sessionID })
             .pipe(Effect.orElseSucceed(() => undefined))
           // Mirror the Codex client's session headers: ChatGPT derives prompt-cache affinity from session-id.
-          evt.headers["session-id"] = session ? SessionAffinity.get(session) : evt.sessionID
+          evt.headers["session-id"] = session
+            ? yield* SessionAffinity.root(session, (id) =>
+                ctx.session.get({ sessionID: id }).pipe(Effect.orElseSucceed(() => undefined)),
+              )
+            : evt.sessionID
           evt.headers["thread-id"] = evt.sessionID
           evt.headers["x-client-request-id"] = evt.sessionID
         }),
