@@ -54,6 +54,7 @@ import { asc, eq, inArray, sql } from "drizzle-orm"
 import { testEffect } from "./lib/effect"
 
 let requests: LLMRequest[] = []
+let streamOptions: Array<{ readonly webSocket?: unknown } | undefined> = []
 /** Runs before a request's response streams; tests hold it back to keep a background summary in flight. */
 let beforeResponse: Effect.Effect<void> = Effect.void
 let reject: ((request: LLMRequest) => boolean) | undefined
@@ -73,8 +74,9 @@ const cost = [
   },
 ]
 const client = Layer.mock(LLMClient.Service)({
-  stream: (request: LLMRequest) => {
+  stream: (request: LLMRequest, options?: { readonly webSocket?: unknown }) => {
     requests.push(request)
+    streamOptions.push(options)
     if (reject?.(request)) {
       return Stream.fail(
         new AIError({
@@ -645,6 +647,46 @@ const recentWithToolOutput = (id: Session.ID, content: SessionMessage.ToolStateC
     const stored = (yield* store.context(id))[0]
     return stored?.type === "compaction" && stored.status === "completed" ? stored.metadata?.recent : ""
   })
+
+it.effect("summary compaction uses the selected WebSocket transport", () =>
+  Effect.gen(function* () {
+    requests = []
+    streamOptions = []
+    const bus = yield* Bus.Service
+    const compaction = yield* SessionCompaction.Service
+    const messages = [
+      {
+        id: SessionMessage.ID.create(),
+        type: "user" as const,
+        text: "Keep this message for the WebSocket summary.",
+        time: { created: DateTime.makeUnsafe(0) },
+      },
+    ]
+    const summarize = (session: Session.Info, model: typeof resolved) => {
+      const inputID = SessionMessage.ID.create()
+      return Effect.gen(function* () {
+        yield* bus.publish(SessionEvent.Compaction.Started, { sessionID: session.id, reason: "manual", inputID })
+        return yield* compaction.compact({
+          reason: "manual",
+          context: { ...loaded(session, messages), model },
+          inputID,
+        })
+      })
+    }
+
+    const websocketSession = yield* insertSession(Session.ID.make("ses_summary_websocket"))
+    expect((yield* summarize(websocketSession, { ...resolved, transport: "websocket" })).status).toBe("completed")
+    expect(requests).toHaveLength(1)
+    expect(streamOptions[0]?.webSocket).toBeDefined()
+
+    requests = []
+    streamOptions = []
+    const httpSession = yield* insertSession(Session.ID.make("ses_summary_http"))
+    expect((yield* summarize(httpSession, resolved)).status).toBe("completed")
+    expect(requests).toHaveLength(1)
+    expect(streamOptions[0]?.webSocket).toBeUndefined()
+  }),
+)
 
 it.effect("manual compaction summarizes short context instead of no-op", () =>
   Effect.gen(function* () {
