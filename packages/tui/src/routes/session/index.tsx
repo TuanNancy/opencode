@@ -1495,7 +1495,11 @@ export function Session(props: {
           // Keeps the toggled disclosure's header on its viewport row through the next layout.
           if (anchor && !(ending && !isAwayFromBottom())) afterLayout(scroll.anchor(anchor))
           sessionTabs.setGroupExpanded(sessionID, id, expanded)
-          afterLayout(saveScrollAnchor)
+          afterLayout(() => {
+            saveScrollAnchor()
+            // Expanding or collapsing changes the content height without a scroll event, so the pill can go stale.
+            updateAwayFromBottom()
+          })
         },
         get width() {
           return contentWidth()
