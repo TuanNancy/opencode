@@ -213,6 +213,20 @@ it.effect("Cohere rejects unsupported media instead of silently dropping it", ()
   }),
 )
 
+it.effect("Cohere accepts image media types regardless of letter case", () =>
+  Effect.gen(function* () {
+    for (const mediaType of ["IMAGE/PNG", "image/png", "Image/Png"]) {
+      const prepared = yield* compileRequest(
+        ai.request({
+          model: cohere.model("command-a-03-2025"),
+          messages: [Message.user([{ type: "media", media: Media.base64("aGVsbG8=", mediaType) }])],
+        }),
+      )
+      expect(prepared.body.messages[0]).toMatchObject({ role: "user", content: [{ type: "image_url" }] })
+    }
+  }),
+)
+
 it.effect("Cohere thinking budgets must be positive integers", () =>
   Effect.gen(function* () {
     const error = yield* compileRequest(
