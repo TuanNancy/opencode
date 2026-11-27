@@ -35,9 +35,9 @@ const schema = <const Definitions extends ReadonlyArray<Definition>>(definitions
             type: Schema.Literal("server.connected"),
             data: Schema.Struct({
               // Optional for clients and fixtures that predate it; the server always sends it.
-              stream: Schema.optional(Schema.String).annotate({
+              stream: Schema.String.annotate({
                 description: "This stream's random ID, which addresses it, e.g. in experimental.space.subscribe.",
-              }),
+              }).pipe(Schema.optional),
             }),
           }).annotate({ identifier: "V2Event.server.connected" }),
         ]),
@@ -45,19 +45,17 @@ const schema = <const Definitions extends ReadonlyArray<Definition>>(definitions
 
 const query = <const Definitions extends ReadonlyArray<Definition>>(definitions: Definitions) =>
   Schema.Struct({
-    types: Schema.optional(
-      Schema.ArrayEnsure(
-        Schema.Union([
-          Schema.Literals(
-            definitions.map((definition) => definition.type) as ReadonlyArray<Definitions[number]["type"]>,
-          ),
-          rpcEvent.fields.type,
-        ]),
-      ),
-    ).annotate({
-      description:
-        "Only send events of these types, plus the initial server.connected event. When omitted, all events are sent.",
-    }),
+    types: Schema.ArrayEnsure(
+      Schema.Union([
+        Schema.Literals(definitions.map((definition) => definition.type) as ReadonlyArray<Definitions[number]["type"]>),
+        rpcEvent.fields.type,
+      ]),
+    )
+      .annotate({
+        description:
+          "Only send events of these types, plus the initial server.connected event. When omitted, all events are sent.",
+      })
+      .pipe(Schema.optional),
   }).annotate({ identifier: "EventSubscribeQuery" })
 
 const make = <const Definitions extends ReadonlyArray<Definition>>(definitions: Definitions) => {

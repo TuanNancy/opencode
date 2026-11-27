@@ -7,9 +7,11 @@ import { LocationQuery, locationQueryOpenApi } from "./location.js"
 
 const ListQuery = Schema.Struct({
   ...LocationQuery.fields,
-  types: Schema.optional(Schema.ArrayEnsure(Model.Type)).annotate({
-    description: "Only list models of these types. Defaults to chat, the only type offered for sessions.",
-  }),
+  types: Schema.ArrayEnsure(Model.Type)
+    .annotate({
+      description: "Only list models of these types. Defaults to chat, the only type offered for sessions.",
+    })
+    .pipe(Schema.optional),
 })
 
 export const ModelGroup = HttpApiGroup.make("server.model")

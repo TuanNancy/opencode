@@ -18,9 +18,9 @@ export type Status = typeof Status.Type
 export interface Time extends Schema.Schema.Type<typeof Time> {}
 export const Time = Schema.Struct({
   started: Schema.Finite.annotate({ description: "Start time in milliseconds since the Unix epoch" }),
-  completed: optional(Schema.Finite).annotate({
+  completed: Schema.Finite.annotate({
     description: "Completion time in milliseconds since the Unix epoch",
-  }),
+  }).pipe(optional),
 }).annotate({ identifier: "Job.Time" })
 
 const Base = {

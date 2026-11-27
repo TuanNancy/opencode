@@ -5,7 +5,7 @@
 Retrieve the current snapshot of available models of the requested types, chat by default, ordered by release date within each type. The snapshot may precede initial plugin settlement.
 
 Parameters:
-- `types?: Model.Type | Model.Type[]` Only list models of these types. Defaults to chat, the only type offered for sessions.
+- `types?: Model.Type | Model.Type[]`
 
 Returns: `{ location: Location.PublicRef; data: Model.Info[] }`
 

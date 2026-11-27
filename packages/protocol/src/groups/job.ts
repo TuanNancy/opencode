@@ -12,18 +12,18 @@ const BooleanFromString = Schema.Literals(["true", "false"]).pipe(
 )
 
 export const ListQuery = Schema.Struct({
-  sessionID: Schema.optional(Session.ID).annotate({
+  sessionID: Session.ID.annotate({
     description: "Filter to background jobs owned by this session.",
-  }),
-  kind: Schema.optional(Job.Kind).annotate({
+  }).pipe(Schema.optional),
+  kind: Job.Kind.annotate({
     description: "Filter by background job kind.",
-  }),
-  status: Schema.optional(Job.Status).annotate({
+  }).pipe(Schema.optional),
+  status: Job.Status.annotate({
     description: "Filter by job status (running, completed, error, or cancelled).",
-  }),
-  descendants: Schema.optional(BooleanFromString).annotate({
+  }).pipe(Schema.optional),
+  descendants: BooleanFromString.annotate({
     description: "When sessionID is set, also include background jobs owned by child and nested subagent sessions.",
-  }),
+  }).pipe(Schema.optional),
 }).annotate({ identifier: "Job.ListQuery" })
 export type ListQuery = typeof ListQuery.Type
 

@@ -41,10 +41,10 @@ export const SpaceEndpoints = [
       spaces: Schema.Array(
         Schema.Struct({
           space: Space.Name,
-          cursor: optional(Space.Cursor).annotate({
+          cursor: Space.Cursor.annotate({
             description:
               "A page's `next`, or a saved `cursor`. Without one, or with one this database cannot use, sync starts from a snapshot.",
-          }),
+          }).pipe(optional),
         }),
       ).check(Schema.isMinLength(1), Schema.isMaxLength(Space.MaxSpaces)),
     }),

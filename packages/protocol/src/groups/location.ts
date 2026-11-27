@@ -6,7 +6,7 @@ import { ServiceUnavailableError } from "../errors.js"
 export const LocationQuery = Schema.Struct({
   location: Schema.optional(
     Schema.Struct({
-      directory: Schema.optional(Schema.String).annotate({ description: "Absolute path of the directory." }),
+      directory: Schema.String.annotate({ description: "Absolute path of the directory." }).pipe(Schema.optional),
     }),
   ).annotateKey({
     description:

@@ -17,7 +17,7 @@ Body:
 - `projectID: string`
 - `from?: string`
 - `branch?: string`
-- `directory?: string`
+- `directory?: string` Parent directory for the new worktree. Uses the project's canonical configuration, then defaults to the server's data directory under worktree/<first six project ID characters>.
 - `name?: string`
 
 Returns: `Worktree.Info`

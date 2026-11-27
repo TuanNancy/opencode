@@ -53,7 +53,9 @@ const page = {
   revision: Revision,
   entries: Schema.Array(Entry),
   cursor: Cursor.annotate({ description: "Covers every change up to this page; save it to subscribe or sync from." }),
-  next: optional(Cursor).annotate({ description: "Present while more pages remain: sync again with it as `cursor`." }),
+  next: Cursor.annotate({ description: "Present while more pages remain: sync again with it as `cursor`." }).pipe(
+    optional,
+  ),
 }
 
 /**

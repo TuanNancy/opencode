@@ -24,9 +24,9 @@ import { ConfigWarming } from "./config/warming.js"
 import { ConfigWorktree } from "./config/worktree.js"
 
 export class Info extends Schema.Class<Info>("Config.Info")({
-  $schema: optional(Schema.String).annotate({
+  $schema: Schema.String.annotate({
     description: "JSON schema reference for configuration validation",
-  }),
+  }).pipe(optional),
   shell: Schema.String.pipe(optional).annotate({
     description: "Default shell to use for terminal and shell tool execution",
   }),

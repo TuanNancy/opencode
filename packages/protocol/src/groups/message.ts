@@ -21,24 +21,32 @@ const MessageTypes = {
 } satisfies Record<SessionMessage.Type, true>
 
 export const SessionMessagesQuery = Schema.Struct({
-  limit: Schema.optional(
-    Schema.NumberFromString.check(Schema.isInt(), Schema.isGreaterThanOrEqualTo(1), Schema.isLessThanOrEqualTo(200)),
-  ).annotate({
-    description: "Maximum number of messages to return. When omitted, the endpoint returns its default page size.",
-  }),
-  order: Schema.optional(Schema.Union([Schema.Literal("asc"), Schema.Literal("desc")])).annotate({
-    description: "Message order for the first page. Use desc for newest first or asc for oldest first.",
-  }),
+  limit: Schema.NumberFromString.check(
+    Schema.isInt(),
+    Schema.isGreaterThanOrEqualTo(1),
+    Schema.isLessThanOrEqualTo(200),
+  )
+    .annotate({
+      description: "Maximum number of messages to return. When omitted, the endpoint returns its default page size.",
+    })
+    .pipe(Schema.optional),
+  order: Schema.Union([Schema.Literal("asc"), Schema.Literal("desc")])
+    .annotate({
+      description: "Message order for the first page. Use desc for newest first or asc for oldest first.",
+    })
+    .pipe(Schema.optional),
   cursor: Schema.optional(
     Schema.String.annotate({
       description:
         "Opaque pagination cursor returned as cursor.previous or cursor.next in the previous response. Do not combine with order.",
     }),
   ),
-  type: Schema.optional(Schema.Literals(Object.keys(MessageTypes) as ReadonlyArray<SessionMessage.Type>)).annotate({
-    description:
-      "Filter by message type before pagination. When omitted, all message types are returned. Pass the same type when following cursors.",
-  }),
+  type: Schema.Literals(Object.keys(MessageTypes) as ReadonlyArray<SessionMessage.Type>)
+    .annotate({
+      description:
+        "Filter by message type before pagination. When omitted, all message types are returned. Pass the same type when following cursors.",
+    })
+    .pipe(Schema.optional),
 }).annotate({ identifier: "SessionMessagesQuery" })
 
 const PublicLocationSwitched = Schema.Struct({

@@ -27,9 +27,9 @@ export type Status = typeof Status.Type
 
 export const Time = Schema.Struct({
   started: Schema.Finite.annotate({ description: "Start time in milliseconds since the Unix epoch" }),
-  completed: optional(Schema.Finite).annotate({
+  completed: Schema.Finite.annotate({
     description: "Completion time in milliseconds since the Unix epoch",
-  }),
+  }).pipe(optional),
 })
 export interface Time extends Schema.Schema.Type<typeof Time> {}
 
@@ -63,7 +63,9 @@ export const Event = { Created, Exited, Deleted, Definitions: inventory(Created,
 export const CreateInput = Schema.Struct({
   command: Schema.String,
   cwd: optional(Schema.String),
-  timeout: optional(NonNegativeInt),
+  timeout: NonNegativeInt.annotate({
+    description: "Timeout in milliseconds. Omit or pass 0 for no timeout.",
+  }).pipe(optional),
   metadata: optional(Metadata),
 })
 export interface CreateInput extends Schema.Schema.Type<typeof CreateInput> {}

@@ -11,7 +11,7 @@ Returns: `{ data: Session.Message.Info }`
 List a session's messages, optionally filtered by type. Follow cursor.next or cursor.previous with the same type filter. Items still in the inbox aren't included.
 
 Parameters:
-- `limit?: string` Maximum number of messages to return. When omitted, the endpoint returns its default page size.
+- `limit?: string`
 - `order?: "asc" | "desc"` Message order for the first page. Use desc for newest first or asc for oldest first.
 - `cursor?: string` Opaque pagination cursor returned as cursor.previous or cursor.next in the previous response. Do not combine with order.
 - `type?: "agent-switched" | "model-switched" | "location-switched" | "user" | "synthetic" | "system" | "skill" | "shell" | "assistant" | "compaction" | "idle"` Filter by message type before pagination. When omitted, all message types are returned. Pass the same type when following cursors.
