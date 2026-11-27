@@ -7,6 +7,8 @@ describe("file path helpers", () => {
     ["/repo", "/repo/src/app.ts", "src/app.ts"],
     ["/repo", "./src/app.ts", "src/app.ts"],
     ["/repo", "file://src/app.ts", "src/app.ts"],
+    ["/repo", "FILE:///repo/src/app.ts", "src/app.ts"],
+    ["/repo", "File:///repo/src/app.ts?x=1#h", "src/app.ts"],
     ["C:\\repo", "C:\\repo\\src\\app.ts", "src\\app.ts"],
     ["C:\\repo", "C:/repo/src/app.ts", "src/app.ts"],
     ["C:\\repo", "file://C:/repo/src/app.ts", "src/app.ts"],

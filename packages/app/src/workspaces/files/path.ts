@@ -1,7 +1,5 @@
 export function stripFileProtocol(input: string) {
-  if (!input.startsWith("file://")) return input
-
-  return input.slice("file://".length)
+  return input.replace(/^file:\/\//i, "")
 }
 
 export function stripQueryAndHash(input: string) {
