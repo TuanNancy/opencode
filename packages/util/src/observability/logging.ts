@@ -33,16 +33,21 @@ function formatter(id: string = runID()) {
 function flatten(
   input: Record<string, unknown>,
   prefix = "",
-  seen = new WeakSet<object>(),
+  ancestors = new WeakSet<object>(),
 ): Array<readonly [string, unknown]> {
-  if (seen.has(input)) return [[prefix, "[Circular]"]]
-  seen.add(input)
+  if (ancestors.has(input)) return [[prefix, "[Circular]"]]
+  ancestors.add(input)
   const entries = Object.entries(input)
-  if (entries.length === 0 && prefix) return [[prefix, input]]
-  return entries.flatMap(([key, value]) => {
-    const path = prefix ? `${prefix}.${key}` : key
-    return plain(value) ? flatten(value, path, seen) : [[path, value] as const]
-  })
+  const result =
+    entries.length === 0 && prefix
+      ? [[prefix, input] as const]
+      : entries.flatMap(([key, value]) => {
+          const path = prefix ? `${prefix}.${key}` : key
+          return plain(value) ? flatten(value, path, ancestors) : [[path, value] as const]
+        })
+  // A sibling can reference the same object without a cycle. Only ancestors count as circular.
+  ancestors.delete(input)
+  return result
 }
 
 function plain(input: unknown): input is Record<string, unknown> {
